@@ -1,0 +1,128 @@
+body {
+  background-color: #171717;
+}
+
+.page {
+  position:relative;
+  font-family:Arial,serif;
+  font-size:16px;
+  margin: 0 auto 0 auto;
+  padding: 0;
+  page-break-after: always;
+  position: relative;
+  width: 8.268in;
+  height: 10.748in;
+  background-color: rgba(255,255,255, 0.95);
+  border: 1px solid black;
+}
+
+@media print {
+    @page {
+     width: 8.268in;
+     height: 10.748in;
+     margin: 0 0 0 0;
+     padding: 0;
+    }
+}
+
+a.linked {
+  position:absolute;
+  top:16px;
+  right:32px;
+}
+
+a.git {
+  position:absolute;
+  padding-right: 6px;
+  top:16px;
+  right:56px;
+}
+
+a.home {
+  position:absolute;
+  font-size:10px;
+  padding-top: 10px;
+  top:32px;
+  right:32px;
+  z-index:1;
+}
+
+.company {
+    font-weight:bold;
+}
+.job {
+  color:rgb(0,0,0);
+  font-weight:normal;
+  font-style:normal;
+  font-size:12px;
+  text-decoration: none;
+  position:relative;
+  left:32px;
+  padding-top:8px;
+  bottom:0;
+  padding-bottom: 0;
+}
+
+h1 {
+  font-family:Tahoma,serif;
+  font-size:0.9em;
+  color:rgb(81,81,81);
+  font-weight:bold;
+  font-style:normal;
+  text-decoration: none;
+  position:relative;
+  margin-bottom: 0;
+  left:32px;
+  top:0px;
+  bottom:0em;
+}
+
+.title {
+  font-style:italic;
+  font-weight:normal;
+}
+
+.loc {
+    position:absolute;
+    font-style:normal;
+    font-size:0.9em;
+    float:right;
+    font-weight:normal;
+    right:64px;
+}
+
+.desc {
+  font-weight:normal;
+  font-style:normal;
+}
+
+ul.a {
+  list-style-position: outside;
+  position:relative;
+  padding-right: 5.5em;
+  padding-left: 2em;
+  bottom:0;
+  padding-bottom: 0;
+  margin-bottom: 0rem;
+  margin-top: 0;
+}
+
+
+
+#name {
+  color:rgb(146,146,146);
+  position:relative;
+  left:32px;
+  top:16px;
+  font-size:20px;
+}
+
+#address {
+  font-size:12px;
+  color:rgb(108,108,108);
+  font-style:italic;
+  position:relative;
+  padding-top: 5px;
+  left:32px;
+
+}
