@@ -29,13 +29,14 @@
   var navbarCollapse = function() {
     if ($("#mainNav").offset().top > 100) {
       $("#mainNav").addClass("navbar-shrink");
-      
+
       // places the resumebutton correctly
       if ($(document).width() >= 992){
         $("#resume-button").height("0px")
         $("#resume-button").css("line-height", "0px")
         $("#resume-button").height($("#navbarResponsive").height() + "px")
         $("#resume-button").css("line-height", $("#navbarResponsive").height() + "px")
+        $("#resume-button").css("color","#1d4355")
       }
     } else {
       $("#mainNav").removeClass("navbar-shrink");
@@ -45,6 +46,7 @@
         $("#resume-button").css("line-height", "0px")
         $("#resume-button").height($("#navbarResponsive").height() + "px")
         $("#resume-button").css("line-height", $("#navbarResponsive").height() + "px")
+        $("#resume-button").css("color","#31708e")
       }
 
     }
@@ -58,7 +60,7 @@
   $(document).ready(larg);
   $(window).resize(larg);
   // $(window).resize(larg);
- 
+
   function larg(){
     if ($(document).width() < 992){
       $("#resume-button").css("border","none")
