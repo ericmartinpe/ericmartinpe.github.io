@@ -123,19 +123,31 @@
 
 @media (min-width: 768px) {
   .masthead h1 {
-    font-size: 4rem;
+    font-size: 3rem;
     line-height: 4rem;
   }
 }
 
+@media (min-width: 1400px) {
+  .masthead h1 {
+    font-size: 4rem;
+    line-height: 4rem;
+  }
+}
+@media (min-width: 1650px) {
+  .masthead h1 {
+    font-size: 5rem;
+    line-height: 4rem;
+  }
+}
 
-@media (min-width: 992px) {
+@media (min-width: 1800px) {
   .masthead {
     height: 100vh;
     padding: 0;
   }
   .masthead h1 {
-    font-size: 6.5rem;
+    font-size: 5.5rem;
     line-height: 6.5rem;
     letter-spacing: 0.8rem;
   }
