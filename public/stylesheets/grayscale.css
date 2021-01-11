@@ -195,7 +195,7 @@
 }
 
 .btn-primary:active {
-  background-color: #904d83 !important;
+  background-color: #4d9cc2 !important;
 }
 
 .about-section {
@@ -308,17 +308,14 @@
 
 .contact-section .social a {
   text-align: center;
-  /* variant of color: #31708E; */
 }
 
 .contact-section .social a:hover {
-   /* variant of color: #31708E; */
-    color: #b474a7;
+    color: #4d9cc2;
 }
 
 .contact-section .social a:active {
-   /* variant of color: #31708E; */
-   color: #97628c;
+   color: #224f64;
 }
 
 body {
@@ -361,13 +358,12 @@ footer {
   padding-right: 20px;
 }
 
-/* resume-button has variations of 31708E */
 #resume-button{
   background-color: transparent;
   border-style: solid;
   display:inline;
   border-radius: 10px;
-  border-color: #31708E;
+  border-color: #1d4355;
   padding:5px;
   height: 88px;
   line-height: 88px;
