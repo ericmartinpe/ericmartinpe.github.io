@@ -63,7 +63,13 @@
     color: white;
   }
   #mainNav.navbar-shrink {
-    background-color: rgba(134, 162, 186, 0.6);
+  background-color: rgba(134, 162, 186, 0.6);
+  background-position: top;
+  width: auto;
+  /* background: url("../img/glacier-head.jpg"); */
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+
   }
   #mainNav.navbar-shrink .navbar-brand {
     color: #161616;
@@ -74,15 +80,15 @@
     border-bottom: 0.25rem solid transparent;
   }
   #mainNav.navbar-shrink .nav-link:hover {
-    color: #31708E;
+    color: #1d4355;
   }
   #mainNav.navbar-shrink .nav-link:active {
-    color: #904d83;
+    color: #317190;
   }
   #mainNav.navbar-shrink .nav-link.active {
-    color: #31708E;
+    color: #1d4355;
     outline: none;
-    border-bottom: 0.25rem solid #31708E;
+    border-bottom: 0.25rem solid #1d4355;
   }
 }
 
