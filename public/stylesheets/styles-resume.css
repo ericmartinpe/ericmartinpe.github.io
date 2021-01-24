@@ -37,15 +37,6 @@ a.git {
   right:56px;
 }
 
-a.home {
-  position:absolute;
-  font-size:10px;
-  padding-top: 10px;
-  top:32px;
-  right:32px;
-  z-index:1;
-}
-
 .company {
     font-weight:bold;
 }
@@ -109,11 +100,13 @@ ul.a {
 
 
 #name {
-  color:rgb(146,146,146);
+  color:rgb(55,55,55);
+
   position:relative;
+  text-align: center;
   left:32px;
   top:16px;
-  font-size:20px;
+  font-size:28px;
 }
 
 #address {
