@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Blog Post </title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="../css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../index.html">ericmartinpe.com</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="../../index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="../blog_home.html">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page content-->
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Post content-->
+                    <article>
+                        <!-- Post header-->
+                        <header class="mb-4">
+                        <!-- Post title-->
+                        <h1 class="fw-bolder mb-1">EnergyPlus Scripting and epJSON</h1>
+                            <!-- Post meta content-->
+                            <div class="text-muted fst-italic mb-2">February, 2024</div>
+                        </header>
+                        <!-- Post content-->
+                        <h2 class="fw-bolder mb-4 mt-5">IDF</h2>
+                        <section class="fs-5 mb-4">
+                            <p>Using scripts to manipulate EnergyPlus input files can be an incredibly powerful way to automate the model development process.
+                                 Until recently, EnergyPlus input files were formatted exclusively in Input Data File (IDF). IDF is a text file that is structured as a list of input objects, 
+                                 where each object has a number of comma-separated fields/parameters associated with it, ending in a semi-colon. The image below shows 
+                                 the Building object from the example file "1ZoneUncontrolled.idf".</p>
+                            <!-- image -->
+                            <figure><img class="img-fluid rounded" src="img/00building-obj.PNG" alt="..." />
+                                <!-- <div class="figure-caption"> Fig.1 - Building object in "1ZoneUncontrolled.idf".</div> -->
+                            </figure>
+
+                            <p>In IDF, the order of the fields matter. The field descriptions (which start with "!-") are really just comments or annotations; 
+                            they only serve to help the user identify the field order and are not actually used by EnergyPlus. The object above could just as easily be specified as a set of 
+                            comma-separated values in a single line, such as:</p>
+
+                            <figure ><img class="img-fluid rounded" src="img/02building-one-line.PNG" alt="..." /></figure>
+
+                        </section>
+
+                        <h2 class="fw-bolder mb-4 mt-5">IDF Scripting</h2>
+                        <section class="fs-5 mb-4">
+                            <p>Common scripting languages like Python and Ruby are able to read IDF files line-by-line, like any other ASCII text file, but are unable 
+                                to interpret the blocks of comma-separated fields as objects.  Without using a specialized parsing library, writing scripts to modify fields 
+                                within an IDF is a tedious and inefficient endeavor.</p>
+                            <p>For example, let's say we want to write a Python script, using only the Python Standard Library, to change the 'North Axis' field
+                                 in the 'Building' object (above) from 0 to 45 (degrees). We could write a script similar to below, where we open the IDF and 
+                                 read line-by-line until we read the "-! North Axis" field description, at which point we substitute the text that we want to replace that line:</p>
+
+                            <figure><img class="img-fluid rounded" src="img/03line.py.PNG" alt="..." /></figure>
+
+                            <p>The drawbacks of this approach are quite apparent even to the novice programmer. First, it relies on the field descriptions being present 
+                                (and written in a camel case), which we already mentioned are not required for the simulation and are often missing or vary (in case or units) 
+                                depending on how to model was developed. Secondly, this method is fairly inefficient as it requires the entire file to be read and copied line-by-line 
+                                in order to make a two-character substitution.  Luckily, there is only one instance in this IDF where the words "North Axis" exist. Other field descriptions 
+                                (e.g. "Cooling Design Capacity") could be found in numerous lines within an IDF, so this approach would simply not work. Improvements could be made to search
+                                instead for the object's Class name, then loop through each field and do a line substitution with some logic. But as you can imagine, there is simply
+                                no avoiding the clukiness of writing a script to perform such a task using only the Python Standard Library.</p>
+
+                            <p>Luckily, several open-source libraries have been developed to facilitate reading and modifing IDF files in a conveinient, object-oriented approach without 
+                                the drawbacks illustrated above.</p>
+
+                        </section>
+
+                        <h3 class="fw-bolder mb-4 mt-5">eppy</h3>
+                        <section class="fs-5 mb-4">
+                            <p>A popular Python library for EnergyPlus is called <a href="https://eppy.readthedocs.io/en/master/readme.html">eppy</a> (EnergyPlus PYthon), developed by Santosh Philip. 
+                                Using the eppy library, a Python script that changes the North Axis field to '45' is shown below.
+                            </p>
+
+                            <figure><img class="img-fluid rounded" src="img/04eppy-script.PNG" alt="..." /></figure>                         
+
+                            <p>Scripting libraries like eppy use the EnergyPlus IDD (input data dictionary) to create a data structure called a 'dictionary' in Python or, more generically, a 'hash table' 
+                                containing each EnergyPlus Class along with all the relevant data for that class, including the number of fields, field descriptions, valid data types for each field, etc. 
+                                Since the field descriptions and number of fields can change with each version of EnergyPlus, it is important that the IDD is associated with the same version of EnergyPlus 
+                                as in the IDF.</p>
+
+                            <p>The IDD file is specified in the first two lines in the script above, immediately following the library imports. A shortcut method for setting the 
+                                IDD is to use the <a href="https://eppy.readthedocs.io/en/master/newfunctions.html#Open-a-file-quickly%C2%B6">easyopen</a> function. As long as the IDF contains 
+                                a Version object and EnergyPlus is installed on your machine in the standard directory, we can re-write the script above more succinctly using easyopen:</p>
+
+                            <figure><img class="img-fluid rounded" src="img/05eppy-easy-open.PNG" alt="..." /></figure>
+
+                            <p> Both of the scripts above save a new file ("1ZoneUncontrolled_out.idf") which is substantively identical to the original example file, except with the 
+                                North Axis changed to 45 degrees. The reason I said the new file is "substantively identical" except for the North Axis field is because eppy sorts the 
+                                file prior to saving it, which removes all comments and groups all objects by class. This is similar to how IDFEditor saves IDFs when the "Sorted" option 
+                                is selected for "Save Order of Objects". Sorting provides a consistent format which is helpful for viewing differences between two sorted files. 
+                                To my knowledge, it is not possible to save IDFs in eppy without sorting.</p>
+                        </section>
+
+                        <h3 class="fw-bolder mb-4 mt-5">Modelkit</h3>
+                        <section class="fs-5 mb-4">
+                            <p><a href="https://bigladdersoftware.com/projects/modelkit/">Modelkit</a> (formerly called Params) is a Ruby framework for parametric modeling, developed by 
+                                <a href="https://bigladdersoftware.com/">Big Ladder Software</a>. Modelkit  is probably better known for its templating system for composing new IDFs, but Modelkit also 
+                                contains a scripting library that can be used for reading and modifying existing IDF files. Unlike Eppy, Modelkit does not re-sort or delete comments 
+                                when saving the IDF. Using the Modelkit library, a Ruby script that changes the North Axis field to '45' is shown below.</p>
+
+                                <figure><img class="img-fluid rounded" src="img/06modelkit-simple.PNG" alt="..." /></figure>
+
+                            <p>A key difference between this Modelkit script and the eppy scripts above: eppy uses the field <span class = "fst-italic">description</span> to access and 
+                                change field values, whereas Modelkit uses the field <span class = "fst-italic">number</span> to access and change field values:</p>
+
+                            <p>eppy:</p>
+                            <figure><img class="img-fluid rounded" src="img/09eppy-assignment.PNG" alt="..." /></figure>
+                            
+                            <p>Modelkit:</p>
+                            <figure><img class="img-fluid rounded" src="img/08modelkit-assignment.PNG" alt="..." /></figure>
+
+                            <p>Using field descriptions instead of field numbers is arguably more convenient for accessing field values, since field number/order changes are more common between 
+                                versions of EnergyPlus. A simple function can be written to lookup the field number based on the field description. The <span style="font-family:'Courier New'">field_number_lookup</span> method in the script 
+                                below takes arguments of <span style="font-family:'Courier New'">class_name</span> and <span style="font-family:'Courier New'">field_def</span> and returns the field number. 
+                                Using this method to lookup field numbers allows the North Axis field to be changed based on the field description instead of the field number.</p>
+
+                                <figure><img class="img-fluid rounded" src="img/07modelkit-lookup.PNG" alt="..." /></figure>
+
+                            <p>You may notice the use of an OpenStudio library in the Modelkit scripts above. The history of Modelkit goes back to early versions of <a href="https://openstudio.net/">OpenStudio</a>. 
+                                Before the conception of the OpenStudio Model (.osm), OpenStudio was a Ruby library that worked directly with IDF, including the OpenStudio Sketchup plugin, which allowed 
+                                users to create, edit, and save IDF geometry. When OpenStudio began using OSM as an intermediary to IDF, the 'old' OpenStudio was referred to as 'Legacy OpenStudio' and its 
+                                continued maintenance and development was granted to Big Ladder Software. Big Ladder has developed the Sketchup plugin,  renamed it 
+                                <a href="https://bigladdersoftware.com/projects/euclid/">Euclid</a>, and the legacy OpenStudio scripting library is now incorporated into the <a href="https://bigladdersoftware.com/projects/modelkit/">Modelkit framework</a>.</p>
+                        </section>
+
+                        <h3 class="fw-bolder mb-4 mt-5">epJSON</h3>
+                        <section class="fs-5 mb-4">
+                            <p> Since the release of version 9.6, EnergyPlus supports input files formatted in epJSON (EnergyPlus JSON), in addition to IDF. 
+                                Converting between IDF and epJSON is trivial, and can be executed at the command line with:</p>
+                            </p><span style="font-family:'Courier New'">C:\EnergyPlusV22-1-0\energyplus --convert-only filename</span></p>
+
+                            <p>In this case, <span style="font-family:'Courier New'">filename</span> can be either an epJSON or an IDF; the command will convert the file type into the other type 
+                                (e.g. epJSON files will be converted to IDF and vice versa).</p>
+                            <p>A convenient way to convert EnergyPlus input file types in Windows is to create a batch file. The batch file below allows the user to drag-and-drop an IDF or epJSON onto the batch file, 
+                                and the corresponding file with the other format and extension will be generated.</p>
+
+                            <figure><img class="img-fluid rounded" src="img/10convert.PNG" alt="..." /></figure>
+                            
+                            <p>The image below shows the IDF format on the left and the epJSON format on the right. 
+                                epJSON structure and syntax is similar to a Python dictionary, with EnergyPlus Classes as keys.</p>
+                            
+                            <figure><img class="img-fluid rounded" src="img/12epjson-vs-idf-with-frame.PNG" alt="..." /></figure>
+
+                            <p>A Python dictionary can be generated from the epJSON file using the 'json' library, which is included in the Python Standard Library. 
+                                JSON (JavaScript Object Notation) is a widely used data-interchange format for which there are reliable parsers that come with the standard libraries 
+                                of all modern scripting languages, including Python and Ruby. This means that we can write scripts to manipulate epJSON files using only standard 
+                                libraries with similar fluency as using 3rd-party libraries like eppy and Modelkit. 
+                                A Python script that changes the North Axis field to '45', using only the 'json' library is shown below.</p>
+
+                            <figure><img class="img-fluid rounded" src="img/10epjson.py.PNG" alt="..." /></figure>
+
+                            <p> Similarly, a Ruby script that changes the North Axis field to '45', using only the 'json' library is shown below.</p>
+                            
+                            <figure><img class="img-fluid rounded" src="img/11epjson.rb.PNG" alt="..." /></figure>
+
+                            <p>The scripts above are not only shorter and simpler than the IDF scripts, but are also computationally more efficient because they don't require parsing the IDD.
+                            Scripting with eJSON is so much more convenient that one could argue that the IDF parsers are now obsolete, because one can easily convert the IDF to epJSON, 
+                            execute whatever scripts are neccessary on the epJSON, and convert back to IDF, if neccessary. The downside of converting from IDF to epJSON and back to IDF, 
+                            is that all comments and field descriptions are deleted and objects will be sorted by class alphabetically. An additional script could be used to re-sort the 
+                            objects and restore the field descriptions, but comments are permanently lost when converted to epJSON.
+                            </p>
+
+                        </section>
+
+                    </article>
+                </div>
+                
+            </div>
+        </div>
+        <!-- Footer-->
+        <footer class="py-5 bg-dark">
+            <div class="container"><p class="m-0 text-center text-white">&copy; 2024 <a href="../../index.html">ericmartinpe.com</a></p></div>
+            <div class="container"><p class="m-0 text-center text-white">source code: <a href="https://github.com/ericmartinpe/ericmartinpe.github.io">ericmartinpe.github.io</p></div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
+</html>
