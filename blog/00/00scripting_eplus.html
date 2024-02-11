@@ -63,8 +63,8 @@
                         <h2 class="fw-bolder mb-4 mt-5">IDF Scripting</h2>
                         <section class="fs-5 mb-4">
                             <p>Common scripting languages like Python and Ruby are able to read IDF files line-by-line, like any other ASCII text file, but are unable 
-                                to interpret the blocks of comma-separated fields as objects.  Without using a specialized parsing library, writing scripts to modify fields 
-                                within an IDF is a tedious and inefficient endeavor.</p>
+                                to interpret the blocks of comma-separated fields as objects.  Without using a specialized parsing library, writing scripts to modify IDF fields 
+                                 is a tedious and inefficient endeavor.</p>
                             <p>For example, let's say we want to write a Python script, using only the Python Standard Library, to change the 'North Axis' field
                                  in the 'Building' object (above) from 0 to 45 (degrees). We could write a script similar to below, where we open the IDF and 
                                  read line-by-line until we read the "-! North Axis" field description, at which point we substitute the text that we want to replace that line:</p>
@@ -72,12 +72,12 @@
                             <figure><img class="img-fluid rounded" src="img/03line.py.PNG" alt="..." /></figure>
 
                             <p>The drawbacks of this approach are quite apparent even to the novice programmer. First, it relies on the field descriptions being present 
-                                (and written in a camel case), which we already mentioned are not required for the simulation and are often missing or vary (in case or units) 
-                                depending on how to model was developed. Secondly, this method is fairly inefficient as it requires the entire file to be read and copied line-by-line 
+                                (and written in a camel case), which are not required for the simulation and are often missing or vary (in case or units) 
+                                depending on how the model was developed. Secondly, this method is fairly inefficient as it requires the entire file to be read and copied line-by-line 
                                 in order to make a two-character substitution.  Luckily, there is only one instance in this IDF where the words "North Axis" exist. Other field descriptions 
-                                (e.g. "Cooling Design Capacity") could be found in numerous lines within an IDF, so this approach would simply not work. Improvements could be made to search
-                                instead for the object's Class name, then loop through each field and do a line substitution with some logic. But as you can imagine, there is simply
-                                no avoiding the clukiness of writing a script to perform such a task using only the Python Standard Library.</p>
+                                (e.g. "Cooling Design Capacity") could be found in numerous lines within an IDF, so this approach would not work. Improvements could be made to search
+                                instead for the object's Class name, then loop through each field and do a line substitution with some logic. But there is no great way to write a script
+                                to manipulate IDFs using only standard libraries.</p>
 
                             <p>Luckily, several open-source libraries have been developed to facilitate reading and modifing IDF files in a conveinient, object-oriented approach without 
                                 the drawbacks illustrated above.</p>
@@ -104,7 +104,7 @@
                             <figure><img class="img-fluid rounded" src="img/05eppy-easy-open.PNG" alt="..." /></figure>
 
                             <p> Both of the scripts above save a new file ("1ZoneUncontrolled_out.idf") which is substantively identical to the original example file, except with the 
-                                North Axis changed to 45 degrees. The reason I said the new file is "substantively identical" except for the North Axis field is because eppy sorts the 
+                                North Axis changed to 45 degrees. The reason I said "substantively identical" is because eppy sorts the 
                                 file prior to saving it, which removes all comments and groups all objects by class. This is similar to how IDFEditor saves IDFs when the "Sorted" option 
                                 is selected for "Save Order of Objects". Sorting provides a consistent format which is helpful for viewing differences between two sorted files. 
                                 To my knowledge, it is not possible to save IDFs in eppy without sorting.</p>
@@ -114,7 +114,7 @@
                         <section class="fs-5 mb-4">
                             <p><a href="https://bigladdersoftware.com/projects/modelkit/">Modelkit</a> (formerly called Params) is a Ruby framework for parametric modeling, developed by 
                                 <a href="https://bigladdersoftware.com/">Big Ladder Software</a>. Modelkit  is probably better known for its templating system for composing new IDFs, but Modelkit also 
-                                contains a scripting library that can be used for reading and modifying existing IDF files. Unlike Eppy, Modelkit does not re-sort or delete comments 
+                                contains a scripting library that can be used for reading and modifying existing IDF files. Unlike Eppy, Modelkit does not delete comments or sort objects
                                 when saving the IDF. Using the Modelkit library, a Ruby script that changes the North Axis field to '45' is shown below.</p>
 
                                 <figure><img class="img-fluid rounded" src="img/06modelkit-simple.PNG" alt="..." /></figure>
@@ -129,7 +129,7 @@
                             <figure><img class="img-fluid rounded" src="img/08modelkit-assignment.PNG" alt="..." /></figure>
 
                             <p>Using field descriptions instead of field numbers is arguably more convenient for accessing field values, since field number/order changes are more common between 
-                                versions of EnergyPlus. A simple function can be written to lookup the field number based on the field description. The <span style="font-family:'Courier New'">field_number_lookup</span> method in the script 
+                                versions of EnergyPlus. The <span style="font-family:'Courier New'">field_number_lookup</span> method in the script 
                                 below takes arguments of <span style="font-family:'Courier New'">class_name</span> and <span style="font-family:'Courier New'">field_def</span> and returns the field number. 
                                 Using this method to lookup field numbers allows the North Axis field to be changed based on the field description instead of the field number.</p>
 
@@ -173,10 +173,10 @@
                             <figure><img class="img-fluid rounded" src="img/11epjson.rb.PNG" alt="..." /></figure>
 
                             <p>The scripts above are not only shorter and simpler than the IDF scripts, but are also computationally more efficient because they don't require parsing the IDD.
-                            Scripting with eJSON is so much more convenient that one could argue that the IDF parsers are now obsolete, because one can easily convert the IDF to epJSON, 
+                            One could argue that the IDF parsers are now obsolete, because one can easily convert the IDF to epJSON, 
                             execute whatever scripts are neccessary on the epJSON, and convert back to IDF, if neccessary. The downside of converting from IDF to epJSON and back to IDF, 
                             is that all comments and field descriptions are deleted and objects will be sorted by class alphabetically. An additional script could be used to re-sort the 
-                            objects and restore the field descriptions, but comments are permanently lost when converted to epJSON.
+                            objects and restore the field descriptions, but comments are permanently lost when an IDF is converted to epJSON.
                             </p>
 
                         </section>
