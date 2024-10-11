@@ -625,6 +625,15 @@ progress {
   color: #6c757d;
 }
 
+.figure-caption-centered {
+  font-size: 0.875em;
+  color: #6c757d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
 .container,
 .container-fluid,
 .container-xxl,
@@ -701,6 +710,13 @@ progress {
 .row-cols-2 > * {
   flex: 0 0 auto;
   width: 50%;
+}
+
+/* New styles to center the image */
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .row-cols-3 > * {
