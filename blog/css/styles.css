@@ -634,6 +634,7 @@ progress {
   margin-bottom: 10px;
 }
 
+
 .container,
 .container-fluid,
 .container-xxl,
@@ -697,6 +698,10 @@ progress {
   flex: 1 0 0%;
 }
 
+.code-block {
+  white-space: pre; /* Preserves spaces and line breaks */
+}
+
 .row-cols-auto > * {
   flex: 0 0 auto;
   width: auto;
@@ -717,6 +722,21 @@ progress {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.center-narrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Ensure the container takes full width */
+}
+
+.narrow-image {
+  width: 50%; /* Adjust the percentage as needed */
+}
+
+.larger-image {
+  width: 80%; /* Adjust the percentage as needed */
 }
 
 .row-cols-3 > * {
