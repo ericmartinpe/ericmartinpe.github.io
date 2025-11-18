@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Blog Post </title>
+        <!-- Favicon-->
+        <link rel="shortcut icon" href="../../public/img/cbecc.ico" type="image/x-icon">
+        <link rel="icon" href="../../public/img/cbecc.ico" type="image/x-icon">
+
+
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="../css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../index.html">ericmartinpe.com</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="../../index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="../blog_home.html">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page content-->
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Post content-->
+                    <article>
+                        <!-- Post header-->
+                        <header class="mb-4">
+                        <!-- Post title-->
+                        <h1 class="fw-bolder mb-1">EnergyPlus MCP</h1>
+                            <!-- Post meta content-->
+                            <div class="text-muted fst-italic mb-2">November, 2025</div>
+                        </header>
+                        <!-- Post content-->
+                        <!-- <h2 class="fw-bolder mb-4 mt-5">IDF</h2> -->
+                        <section class="fs-5 mb-4">
+                            <p>
+
+                                Last month, I attended a webinar hosted by <a href="https://tpc.ashrae.org/CustomPages?idx=5f0b34a1-4e42-45cd-b925-0f711f5d79aa">ASHRAE TC 4.7</a>
+                                about <a href="https://github.com/LBNL-ETA/EnergyPlus-MCP">EnergyPlus-MCP</a>, the first open-source Model Context Protocol (MCP) server designed for EnergyPlus simulation workflows.
+                                The <a href="https://modelcontextprotocol.io/docs/getting-started/intro">Model Context Protocol</a> (MCP) is an open-source standard that defines a standardized, uniform way for Large Language Models (LLMs) 
+                                and other AI systems to utilize external applications and data sources. 
+
+                                Following an introduction by <a href="https://eta.lbl.gov/people/tianzhen-hong">Tianzhen Hong</a>, <a href="https://buildings.lbl.gov/people/han-li">Han Li</a> provided a 
+                                compelling presentation and demonstration of the server's capabilities. Their work, co-authored with <a href="https://buildings.lbl.gov/people/yujie-xu">Yuijie Xu</a>, is detailed 
+                                in their <a href="https://www.sciencedirect.com/science/article/pii/S2352711025003334">paper</a> published in the December issue of <a href="https://www.sciencedirect.com/journal/softwarex/vol/32/suppl/C"><i>SoftwareX</i></a>.
+                            </p>
+                            <p>
+                                The EnergyPlus MCP repository contains a development container that can be opened using Docker Desktop and VSCode with the Dev Containers extension. 
+                                Once that software is installed, opening the repository in VS Code will prompt the user to reopen it in a container. 
+                                After accepting, Docker Desktop will build the container with all the relevant software and tools pre-installed. 
+                                </p>
+                           <!-- image -->
+                            <div class="center">
+                                <img src="img/energyplus-mcp-setup.gif" alt="EnergyPlus MCP setup: building the container in VSCode" class="wide-image rounded">
+                            </div>
+                            <div class="figure-caption-centered">EnergyPlus MCP setup: building the container in VSCode (2x speed, edited).</div>
+
+                            <p>
+                                The user can then interact with the EnergyPlus MCP server via LLM prompts in GitHub Copilot. 
+                                The workspace includes a sample_files directory with several EnergyPlus models for quick testing. 
+                                We can prompt the LLM to list the files in sample_files:
+                            </p>
+                           <!-- image -->
+                            <div class="center">
+                                <img src="img/energyplus-mcp-sample_files.gif" alt="List files in sample_files" class="wide-image rounded">
+                            </div>
+                            <div class="figure-caption-centered">List the files in sample_files.</div>
+
+                            <p>
+                                The LLM simply listed all the files in the sample_files folder using basic filesystem operations, without utilizing any specialized capabilities provided by the EnergyPlus MCP server.
+                                The EnergyPlus MCP contains a Python Class called <a href="https://github.com/LBNL-ETA/EnergyPlus-MCP/blob/main/energyplus-mcp-server/energyplus_mcp_server/energyplus_tools.py">EnergyPlusManager</a>, 
+                                which consists of several methods that facilitate EnergyPlus input file operations and automate simulation workflows. 
+                                Some of these are generic helper methods for working with file systems and post-processing, such as:
+                            </p>
+                            <ul>
+                                <li><code>_find_simulation_outputs</code></li>
+                                <li><code>_resolve_idf_path</code></li>
+                                <li><code>_resolve_weather_file_path</code></li>
+                                <li><code>copy_file</code></li>
+                                <li><code>create_interactive_plot</code></li>
+                                <li><code>get_configuration_info</code></li>
+                                <li><code>list_available_files</code></li>
+                            </ul>
+                            <p> 
+                                Most of the methods in EnergyPlusManager involve reading and modifying EnergyPlus input data files (IDFs), such as:
+                            </p>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <ul>
+                                        <li><code>_create_simplified_diagram</code></li>
+                                        <li><code>_create_topology_based_diagram</code></li>
+                                        <li><code>_get_airloop_topology</code></li>
+                                        <li><code>_get_branch_details</code></li>
+                                        <li><code>_get_branches_from_list</code></li>
+                                        <li><code>_get_connector_details</code></li>
+                                        <li><code>_get_connectors_from_list</code></li>
+                                        <li><code>_get_plant_condenser_topology</code></li>
+                                        <li><code>add_coating_outside</code></li>
+                                        <li><code>add_output_meters</code></li>
+                                        <li><code>add_output_variables</code></li>
+                                        <li><code>add_window_film_outside</code></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <ul>
+                                        <li><code>change_infiltration_by_mult</code></li>
+                                        <li><code>check_simulation_settings</code></li>
+                                        <li><code>discover_hvac_loops</code></li>
+                                        <li><code>get_loop_topology</code></li>
+                                        <li><code>get_materials</code></li>
+                                        <li><code>get_model_basics</code></li>
+                                        <li><code>get_output_meters</code></li>
+                                        <li><code>get_output_variables</code></li>
+                                        <li><code>get_surfaces</code></li>
+                                        <li><code>inspect_electric_equipment</code></li>
+                                        <li><code>inspect_lights</code></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <ul>
+                                        <li><code>inspect_people</code></li>
+                                        <li><code>inspect_schedules</code></li>
+                                        <li><code>list_zones</code></li>
+                                        <li><code>load_idf</code></li>
+                                        <li><code>modify_electric_equipment</code></li>
+                                        <li><code>modify_lights</code></li>
+                                        <li><code>modify_people</code></li>
+                                        <li><code>modify_simulation_settings</code></li>
+                                        <li><code>run_simulation</code></li>
+                                        <li><code>validate_idf</code></li>
+                                        <li><code>visualize_loop_diagram</code></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <p>
+                                These domain-specific methods rely on <a href="https://pypi.org/project/eppy/">eppy</a> for parsing, manipulating, and writing EnergyPlus IDF files. 
+                                Eppy (EnergyPlus PYthon) is an open-source scripting library for IDFs developed by <a href="https://coolship.cool/author/santosh/">Santosh Philip</a>.
+                            </p>
+                            <p>
+                                In addition to the sample_files folder, the dev container provides access to example files from the EnergyPlus installation (/app/software/EnergyPlusV25-1-0/ExampleFiles/). 
+                                We can prompt the LLM to list and summarize the example files:
+                            </p>
+                           <!-- image -->
+                            <div class="center">
+                                <img src="img/list_example_files.gif" alt="Example files are summarized using the list_available_files tool" class="wide-image rounded">                            </div>
+                            <div class="figure-caption-centered">Example files are summarized using the list_available_files tool.</div>
+                            <p>
+                                This time, the LLM used the <code>list_available_files</code> tool to list the example files. 
+                                We can also ask more specific questions, like “Which models have VAV systems?”:
+                            </p>
+                           <!-- image -->
+                            <div class="center">
+                                <img src="img/vav_models.gif" alt="Models with VAV systems" class="wide-image rounded">                            </div>
+                            <div class="figure-caption-centered">The LLM lists models with VAV systems.</div>
+                            <p>
+                                The MCP server utilizes <a href="https://github.com/jlowin/fastmcp">FastMCP</a> to register tool functions using the @mcp.tool() decorator. 
+                                These tool functions act as wrappers that call methods from the EnergyPlusManager class to perform EnergyPlus operations. 
+                                For example, <a href="method_registration.html" id="this-code">this code</a> shows how the <code>change_infiltration_by_mult</code> tool is registered in server.py using the @mcp.tool() decorator.
+                            </p>
+                           
+                            <p>
+                                The registered tool functions are necessary to provide capabilities that the LLM cannot perform on its. 
+                                Modern LLMs are already very capable of understanding concepts, generating code, and providing instructions. 
+                                In fact, changing the infiltration is a simple enough task that the LLM may try to perform this request without 
+                                using any registered tools:
+                            </p>
+                           <!-- image -->
+                            <div class="center">
+                                <img src="img/change_infiltration_onthefly.gif" alt="LLM changes infiltration without using registered tools" class="wide-image rounded">
+                            </div>
+                            <div class="figure-caption-centered">The LLM changes the infiltration rate without using any registered tools.</div>
+                            <p>
+                                Rather than hoping the LLM will implement this task correctly on its own, we can instead prompt the LLM to use the <code>change_infiltration_by_mult</code> method:
+                            </p>
+                            <p>
+                           <!-- image -->
+                            <div class="center">
+                                <img src="img/change_infiltration_by_mult_explicit.gif" alt="LLM changes infiltration using change_infiltration_by_mult" class="wide-image rounded">
+                            </div>
+                            <div class="figure-caption-centered">The LLM changes the infiltration rate using change_infiltration_by_mult.</div>
+                            </p>
+
+                            <p>
+                                If we want to avoid the LLM altogether but still utilize the methods available in EnergyPlusManager, we can always write a script to call these methods the old-fashioned way. 
+                                Calling the methods directly in a script ensures that we perform the correct operations and is much faster once the script is developed. 
+                                The obvious downside to this approach is that more time and attention are needed to develop the script, call it with the appropriate arguments, and process the results (if needed).
+                                For example, if we want to halve the infiltration rate in an IDF, we can apply the <code>change_infiltration_by_mult</code> method with a <code>mult_factor</code> of 0.5:
+                            </p>
+                            <div class="code-block">
+                                <code>
+                                    mult_factor = 0.5
+                                    manager = EnergyPlusManager(config)
+                                    manager.change_infiltration_by_mult(
+                                        idf_path=idf_path,
+                                        mult=mult_factor,
+                                        output_path=output_path
+                                    )
+                                </code>
+                            </div>
+
+                            <p>
+                                The true power of the LLM lies in its capacity for intelligent workflow orchestration. 
+                                Instead of requiring a step-by-step procedure, the model needs only a single, high-level instruction to autonomously select, sequence, and execute the necessary tools to achieve the final goal. 
+                                For example, we can prompt:  <strong>"Copy an office model from ExampleFiles to sample_files, add window film to reduce solar heat gain, run a simulation, 
+                                and tell me the energy impact,"</strong> and the LLM will orchestrate the appropriate tools to complete the entire workflow.
+                            </p>
+                           <!-- image -->
+                            <div class="center">
+                                <img src="img/list_of_tasks.gif" alt="The LLM performs a list of tasks using registered tools." class="wide-image rounded">
+                            </div>
+
+                            <p>
+                                Based on a single-sentence prompt, the LLM:
+                            </p>
+                            <ul>
+                                <li>Ran <code>list_available_files</code> to discover the available IDFs</li>
+                                <li>Found models that resemble office buildings</li>
+                                <li>Copied the ASHRAE 90.1-2019 Medium Office prototype to sample_files (using <code>copy_file</code>)</li>
+                                <li>Ran <code>add_window_film_outside</code> to apply the window film measure to all 18 window surfaces in the model</li>
+                                <li>Added appropriate output meters to the model (<code>add_output_meters</code>) to the modified model and the original model</li>
+                                <li>Discovered the appropriate weather file given the location in the IDF (Denver, CO)</li>
+                                <li>Created a temporary directory for the simulations (<code>create_directory</code>)</li>
+                                <li>Ran simulations of the modified and original models (<code>run_energyplus_simulation</code>)</li>
+                                <li>Read the output files (<code>read_text_file</code>), and summarized the results</li>
+                                <li>Presented a succinct summary of the analysis, pointing out that the window film measure actually increased energy consumption due to increasing the window SHGC (0.45 vs 0.38 baseline), which caused an increase in cooling energy relative to the baseline model.</li>
+                            </ul>
+
+                            <p>
+                                The EnergyPlus MCP server demonstrates how the Model Context Protocol can bridge the gap between natural language instructions and complex building energy simulation workflows. 
+                                By combining the reasoning capabilities of modern LLMs with domain-specific tools, this approach offers a compelling alternative to traditional scripting — one that balances automation with precision. 
+                                While writing custom scripts provides full control and predictability, the MCP approach excels at exploratory analysis and rapid prototyping, where the ability to express intent in plain language can significantly accelerate the discovery process. 
+                                As MCP adoption grows and more building simulation tools become accessible through this standard interface, we can expect to see new possibilities for integrating AI into engineering workflows, making sophisticated analyses more accessible without sacrificing technical rigor.
+                            </p>
+
+
+
+
+
+
+
+        <!-- Footer-->
+        <footer class="py-5 bg-dark">
+            <div class="container"><p class="m-0 text-center text-white">&copy; 2025 <a href="../../index.html">ericmartinpe.com</a></p></div>
+            <div class="container"><p class="m-0 text-center text-white">source code: <a href="https://github.com/ericmartinpe/ericmartinpe.github.io">ericmartinpe.github.io</p></div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
+</html>

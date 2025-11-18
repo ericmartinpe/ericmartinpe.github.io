@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Blog Post </title>
+        <!-- Favicon-->
+        <link rel="shortcut icon" href="../../public/img/cbecc.ico" type="image/x-icon">
+        <link rel="icon" href="../../public/img/cbecc.ico" type="image/x-icon">
+
+
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="../css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Back to blog link-->
+        <div class="container mt-3">
+            <a href="02energyplus-mcp.html#this-code" class="text-decoration-none">
+                ← Back
+            </a>
+        </div>
+        <!-- Page content-->
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Post content-->
+                    <article>
+
+                        <!-- Post content-->
+                        <!-- <h2 class="fw-bolder mb-4 mt-5">IDF</h2> -->
+                        <section class="fs-5 mb-4">
+                            <p>
+                                The code below shows how the <code>change_infiltration_by_mult</code> tool is registered in server.py using the @mcp.tool() decorator.
+                            </p>
+                            <!-- image -->
+                            <div class="center">
+                                <img src="img/fast_mcp.PNG" alt="FastMCP" class="wide-image rounded">
+                            </div>
+                            <div class="figure-caption-centered">Registering the change_infiltration_by_mult tool in server.py.</div>
+                            <p>
+                                This wrapper function calls the corresponding <code>change_infiltration_by_mult</code> method from EnergyPlusManager and includes error handling for 
+                                common exceptions like FileNotFoundError. 
+                                Each method in EnergyPlusManager requires a similar wrapper function. When adding new functionality, developers must:
+                            </p>
+                            <ol>
+                                <li>Implement the method in EnergyPlusManager</li>
+                                <li>Create a corresponding decorated async wrapper function in server.py with error handling and logging</li>
+                            </ol>
+                            <p>
+                            An LLM agent could potentially help automate this process by generating the boilerplate wrapper code.
+                            </p>
+        <!-- Back to blog link-->
+        <div class="container mt-3">
+            <a href="02energyplus-mcp.html#this-code" class="text-decoration-none">
+                ← Back
+            </a>
+        </div>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
+</html>
