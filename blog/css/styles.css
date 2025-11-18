@@ -700,6 +700,22 @@ progress {
 
 .code-block {
   white-space: pre; /* Preserves spaces and line breaks */
+  margin: 0.25rem 0; /* Minimal vertical margin */
+}
+
+.code-block code {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* Reduce spacing between paragraphs and code blocks */
+p + .code-block {
+  margin-top: 0.5rem;
+}
+
+.code-block + p {
+  margin-top: 0.5rem;
 }
 
 .row-cols-auto > * {
@@ -733,6 +749,11 @@ progress {
 
 .narrow-image {
   width: 50%; /* Adjust the percentage as needed */
+}
+
+.wide-image {
+  max-width: 100%; /* Ensures consistent display width for all gifs */
+  height: auto;
 }
 
 .larger-image {
