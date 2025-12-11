@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Blog Post </title>
+        <!-- Favicon-->
+        <link rel="shortcut icon" href="../../public/img/cbecc.ico" type="image/x-icon">
+        <link rel="icon" href="../../public/img/cbecc.ico" type="image/x-icon">
+
+
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="../css/styles.css" rel="stylesheet" />
+        <!-- Syntax highlighting only -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <style>
+            pre {
+                background-color: #f6f8fa;
+                padding: 16px;
+                border-radius: 6px;
+                overflow: auto;
+            }
+            pre code {
+                background-color: transparent;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../index.html">ericmartinpe.com</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="../../index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="../blog_home.html">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page content-->
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Post content-->
+                    <article>
+                        <!-- Post header-->
+                        <header class="mb-4">
+                        <!-- Post title-->
+                        <h1 class="fw-bolder mb-1">EnergyPlus MCP: epJSON Edition</h1>
+                            <!-- Post meta content-->
+                            <div class="text-muted fst-italic mb-2">December, 2025</div>
+                        </header>
+                        <!-- Post content-->
+                        <!-- <h2 class="fw-bolder mb-4 mt-5">IDF</h2> -->
+                        <section class="fs-5 mb-4">
+                            <p>
+                                In <a href="../02/02energyplus-mcp.html">my last blog post</a>, I wrote about a recent webinar I attended that showcased LBNL's <a href="https://github.com/LBNL-ETA/EnergyPlus-MCP">EnergyPlus MCP server</a>. 
+                                I was inspired by the server's capabilities for manipulating EnergyPlus input files and automating workflows. I immediately began playing around with it and testing the tools. 
+                                Most of the tools rely on <a href="https://pypi.org/project/eppy/">eppy</a> for parsing, manipulating, and writing EnergyPlus IDF files.
+                                Having recently developed similar tools that leverage the <a href="../00/00scripting_eplus.html#epjson">epJSON</a> input file format, I realized that the tools could be refactored to eliminate their dependency on eppy.
+                            </p>
+                            <p>
+                                So, I forked the repository, called it <a href="https://github.com/ericmartinpe/EnergyPlus-MCP-epjson">EnergyPlus-MCP-epJSON</a>, and got to work re-writing all the tools without relying on eppy. You might be wondering: why does the file format matter? 
+                                After all, both IDF and epJSON represent the same EnergyPlus model data. 
+                                The answer lies in how we interact with that data programmatically. 
+                            </p>
+                            <p>
+                               While eppy is a solid tool, it adds an external dependency with its own overhead and complexity. 
+                               The epJSON fork uses only Python's standard library - specifically the built-in JSON module. 
+                               No external parsing libraries, no additional dependencies to install or maintain; just native Python dictionaries and lists representing the EnergyPlus model. 
+                               A similar fork could be made for just about any scripting language, since they almost all have built-in JSON modules, including Ruby, Javascript, and PHP. 
+                               I chose to stick with Python because that's what the rest of the library is written in and it's also the most popular scripting language. 
+                            </p>
+                            <h2 >Eliminating the eppy Dependency</h2>
+                            <p>The shift from using eppy to using on only the Python standard library has significant benefits:</p>
+                            <ol>
+                                <li><strong>Performance:</strong> No intermediate parsing layer. When you load an epJSON file, Python's highly optimized C-based json parser reads it directly into memory as a dictionary. 
+                                With IDF files, eppy must first parse the text format, then construct Python objects. The epJSON approach skips that entire overhead.
+                                </li>
+                                <li><strong>Reliability:</strong> Standard library code is battle-tested, stable, and maintained by the core Python team. 
+                                    No risk of dependency conflicts, no waiting for third-party updates, no compatibility issues between versions.
+                                </li>
+                                <li><strong>Transparency:</strong> JSON dictionaries are native Python data structures. 
+                                    If an issue arises, you only need to investigate your own code. If you encounter a problem while using eppy, the error might stem from either your code or eppy's internal logic.
+                                </li>
+                                <li><strong>Elegance:</strong> Scripts that leverage Python dictionaries are more elegant and performant than the equivalent eppy functions.
+                                    Let me show you a concrete example, comparing the <code>_get_branch_details</code> method before and after:
+                                </li>
+                            </ol>
+<h2><code>_get_branch_details</code> using eppy</h2>
+                            <pre><code class="language-python"><span class="hljs-comment"># OLD: IDF with eppy - Requires external library + brittle numbered fields</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">_get_branch_details</span>(<span class="hljs-params"><span class="hljs-built_in">self</span>, idf, branch_name: <span class="hljs-built_in">str</span></span>) -&gt; Optional[Dict[<span class="hljs-built_in">str</span>, Any]]:
+    <span class="hljs-string">&quot;&quot;&quot;Helper method to get detailed information about a specific branch&quot;&quot;&quot;</span>
+    branch_objs = idf.idfobjects.get(<span class="hljs-string">&quot;Branch&quot;</span>, [])
+    
+    <span class="hljs-keyword">for</span> branch <span class="hljs-keyword">in</span> branch_objs:
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">getattr</span>(branch, <span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;&#x27;</span>) == branch_name:
+            branch_info = {
+                <span class="hljs-string">&quot;name&quot;</span>: branch_name,
+                <span class="hljs-string">&quot;components&quot;</span>: []
+            }
+            
+            <span class="hljs-comment"># Get all components in the branch</span>
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, <span class="hljs-number">20</span>):  <span class="hljs-comment"># EnergyPlus branches can have multiple components - hope 20 is enough!</span>
+                comp_type_field = <span class="hljs-string">f&quot;Component_<span class="hljs-subst">{i}</span>_Object_Type&quot;</span> <span class="hljs-keyword">if</span> i &gt; <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;Component_1_Object_Type&quot;</span>
+                comp_name_field = <span class="hljs-string">f&quot;Component_<span class="hljs-subst">{i}</span>_Name&quot;</span> <span class="hljs-keyword">if</span> i &gt; <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;Component_1_Name&quot;</span>
+                comp_inlet_field = <span class="hljs-string">f&quot;Component_<span class="hljs-subst">{i}</span>_Inlet_Node_Name&quot;</span> <span class="hljs-keyword">if</span> i &gt; <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;Component_1_Inlet_Node_Name&quot;</span>
+                comp_outlet_field = <span class="hljs-string">f&quot;Component_<span class="hljs-subst">{i}</span>_Outlet_Node_Name&quot;</span> <span class="hljs-keyword">if</span> i &gt; <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;Component_1_Outlet_Node_Name&quot;</span>
+                
+                comp_type = <span class="hljs-built_in">getattr</span>(branch, comp_type_field, <span class="hljs-literal">None</span>)
+                comp_name = <span class="hljs-built_in">getattr</span>(branch, comp_name_field, <span class="hljs-literal">None</span>)
+                
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> comp_type <span class="hljs-keyword">or</span> <span class="hljs-keyword">not</span> comp_name:
+                    <span class="hljs-keyword">break</span>
+                
+                component_info = {
+                    <span class="hljs-string">&quot;type&quot;</span>: comp_type,
+                    <span class="hljs-string">&quot;name&quot;</span>: comp_name,
+                    <span class="hljs-string">&quot;inlet_node&quot;</span>: <span class="hljs-built_in">getattr</span>(branch, comp_inlet_field, <span class="hljs-string">&#x27;Unknown&#x27;</span>),
+                    <span class="hljs-string">&quot;outlet_node&quot;</span>: <span class="hljs-built_in">getattr</span>(branch, comp_outlet_field, <span class="hljs-string">&#x27;Unknown&#x27;</span>)
+                }
+                branch_info[<span class="hljs-string">&quot;components&quot;</span>].append(component_info)
+            
+            <span class="hljs-keyword">return</span> branch_info
+    
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+</code></pre>
+<p>Notice: external import, special eppy objects, hardcoded limits, conditional field naming. This is 32 lines fighting against both the format AND the library.</p>
+<h2 ><code>_get_branch_details</code> using the epJSON dictionary-based approach</h2>
+<p>Here's the exact same method in the epJSON fork using only the Python standard library:</p>
+<pre><code class="language-python"><span class="hljs-comment"># NEW: epJSON - Standard library only, clean and Pythonic</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">_get_branch_details</span>(<span class="hljs-params"><span class="hljs-built_in">self</span>, ep, branch_name: <span class="hljs-built_in">str</span></span>) -&gt; Optional[Dict[<span class="hljs-built_in">str</span>, Any]]:
+    <span class="hljs-string">&quot;&quot;&quot;Helper method to get detailed information about a specific branch&quot;&quot;&quot;</span>
+    branch_objs = ep.get(<span class="hljs-string">&quot;Branch&quot;</span>, {})
+    <span class="hljs-keyword">if</span> branch_name <span class="hljs-keyword">in</span> branch_objs:
+        branch_info = {
+            <span class="hljs-string">&quot;name&quot;</span>: branch_name,
+            <span class="hljs-string">&quot;components&quot;</span>: []
+        }
+        comps = branch_objs[branch_name][<span class="hljs-string">&quot;components&quot;</span>]
+        <span class="hljs-keyword">for</span> comp <span class="hljs-keyword">in</span> comps:
+            component_info = {
+                <span class="hljs-string">&quot;type&quot;</span>: comp[<span class="hljs-string">&quot;component_object_type&quot;</span>],
+                <span class="hljs-string">&quot;name&quot;</span>: comp[<span class="hljs-string">&quot;component_name&quot;</span>],
+                <span class="hljs-string">&quot;inlet_node&quot;</span>: comp[<span class="hljs-string">&quot;component_inlet_node_name&quot;</span>],
+                <span class="hljs-string">&quot;outlet_node&quot;</span>: comp[<span class="hljs-string">&quot;component_outlet_node_name&quot;</span>]
+            }
+            branch_info[<span class="hljs-string">&quot;components&quot;</span>].append(component_info)
+        <span class="hljs-keyword">return</span> branch_info       
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+</code></pre>
+<p>Eighteen lines total. No external dependencies. No magic numbers. No conditionals. Just natural Python iteration over a list. The epJSON format stores components as actual arrays, and Python's json module gives us instant access.</p>
+<h2 id="performance-benefit-1-direct-json-parsing">Performance Benefit 1: Direct JSON Parsing</h2>
+<p>Let's talk about file loading performance.</p>
+<p>The IDF approach:</p>
+<pre><code class="language-python"><span class="hljs-keyword">from</span> eppy.modeleditor <span class="hljs-keyword">import</span> IDF
+idf = IDF(idf_path)  <span class="hljs-comment"># Parse text → Build eppy objects → Attribute wrappers</span>
+</code></pre>
+<p>This involves multiple steps: reading the text file, parsing IDF syntax, creating Python objects for each element, wrapping them in eppy's attribute system.</p>
+<p>The epJSON approach:</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> json
+<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(epjson_path) <span class="hljs-keyword">as</span> f:
+    ep = json.load(f)  <span class="hljs-comment"># JSON → Python dict (single optimized C operation)</span>
+</code></pre>
+<p>Python's json module is implemented in C for speed. It reads the file and creates native Python dictionaries in one highly optimized operation. No intermediate object creation, no attribute wrapper overhead.</p>
+<p>For large models with thousands of objects, this difference is measurable. Loading times can be <strong>2-3x faster</strong> with epJSON.</p>
+<h2 id="performance-benefit-2-o1-vs-on-lookups">Performance Benefit 2: O(1) vs O(n) Lookups</h2>
+<p>Beyond file loading, the runtime performance is dramatically better.</p>
+<p>The IDF/eppy approach requires linear search:</p>
+<pre><code class="language-python">branch_objs = idf.idfobjects.get(<span class="hljs-string">&quot;Branch&quot;</span>, [])  <span class="hljs-comment"># Returns a list</span>
+<span class="hljs-keyword">for</span> branch <span class="hljs-keyword">in</span> branch_objs:
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">getattr</span>(branch, <span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;&#x27;</span>) == branch_name:
+        <span class="hljs-comment"># Found it!</span>
+</code></pre>
+<p>The epJSON approach uses dictionary keys:</p>
+<pre><code class="language-python">branch_objs = ep.get(<span class="hljs-string">&quot;Branch&quot;</span>, {})  <span class="hljs-comment"># Returns a dict</span>
+<span class="hljs-keyword">if</span> branch_name <span class="hljs-keyword">in</span> branch_objs:  <span class="hljs-comment"># O(1) lookup</span>
+    <span class="hljs-comment"># Found it instantly!</span>
+</code></pre>
+<p>For models with hundreds of branches, zones, or surfaces, this means dramatically faster operations. No external library overhead, just Python's highly optimized dictionary implementation.</p>
+<h2 id="performance-benefit-3-native-data-structures">Performance Benefit 3: Native Data Structures</h2>
+<p>The epJSON format uses Python's native data structures throughout - no wrapper classes, no attribute lookup overhead. This means:</p>
+<ul>
+<li><strong>Lists for collections</strong>: HVAC branches, outlet branches, inlet branches - all stored as Python lists you can iterate normally</li>
+<li><strong>Dictionaries for objects</strong>: Direct key access instead of getattr calls through eppy's attribute system</li>
+<li><strong>Consistent naming</strong>: Everything uses snake_case, matching Python conventions</li>
+<li><strong>Memory efficiency</strong>: No duplicate data in wrapper objects, just the raw dictionary</li>
+</ul>
+<p>This isn't just cleaner code - it's faster code with a smaller memory footprint. Every operation uses Python's optimized built-in implementations.</p>
+<h2 id="other-benefits">Other Benefits</h2>
+<ul>
+<li><strong>Environment Compatibility</strong>: Works anywhere Python works. No concerns about eppy compatibility with specific Python versions or operating systems.</li>
+<li><strong>Security</strong>: Smaller dependency tree means smaller attack surface. Every external library is a potential security risk - the epJSON fork minimizes this.</li>
+<li><strong>Maintenance</strong>: No reliance on eppy to release compatible versions or bug fixes.</li>
+</ul>
+
+<h2 id="new-feature">More Capabilities!</h2>
+<p>
+    I wanted to make the epJSON fork even more compelling for users and developers. 
+    The first step was to eliminate the eppy dependency to create tools that are faster and more maintainable.
+    Secondly, I wanted to enable <strong>backwards compatibility with IDF</strong>, even though the operations leverage epJSON. 
+    This is accomplished by automatically converting IDFs to epJSON format if the user selects and IDF input file.
+    <a href="../00/00scripting_eplus.html#epjson">Converting between IDF and epJSON</a> is computationally trivial, so this wasn't a big lift.
+</p>
+
+<p>
+    Lastly, I added a new tool, which was requested during the webinar: 
+    <ul>
+        <li>
+            <strong>set_exterior_wall_construction</strong>: This method applies exterior wall constructions that are minimally complaint with either ASHRAE 90.1 or IECC (all code vintages up to 2022).
+        </li>
+    </ul>
+    Let's see this new feature in action:
+</p>
+                            <div class="center">
+                                <img src="img/ext-walls.gif" alt="set_exterior_wall_constructions" class="wide-image rounded">
+                            </div>
+                            <div class="figure-caption-centered">set_exterior_wall_constructions tool.</div>
+                            <p>
+                                Based on a single-sentence prompt, the LLM:
+                            </p>
+                            <ul>
+                                <li>Ran <code>list_available_files</code> to find a Small Office model in the ExampleFiles folder</li>
+                                <li>Copied ASHRAE901_OfficeSmall_STD2019_Denver.idf to outputs (using <code>copy_file</code>)</li>
+                                <li>Converted the IDF to epJSON format (using <code>convert_idf_to_epjson</code>)</li>
+                                <li>Identified all the exterior walls in the mode (using <code>find_exterior_walls</code>)</li>
+                                <li>Determined which climate zone the model is located in (5B, Denver)</li>
+                                <li>Created the mass wall construction meeting minimum compliance with 90.1-2022 in climate zone 5B and applied that construction to all exterior walls (<code>set_exterior_wall_construction</code>)</li>
+                             </ul>
+
+<p>
+    The u-factor of the new exterior wall construction was confirmed with a follow up prompt (What is the u-factor (in IP units) of the exterior walls?).
+</p>
+<p>
+    I plan to add many more tools that are helpful in my daily workflows, and I encourage others to check out <a href="https://github.com/ericmartinpe/EnergyPlus-MCP-epjson">EnergyPlus-MCP-epjson</a> 
+    (or the original <a href="https://github.com/LBNL-ETA/EnergyPlus-MCP">EnergyPlus MCP server</a>),
+    and contribute theirs too!
+</p>
+        <!-- Footer-->
+        <footer class="py-5 bg-dark">
+            <div class="container"><p class="m-0 text-center text-white">&copy; 2025 <a href="../../index.html">ericmartinpe.com</a></p></div>
+            <div class="container"><p class="m-0 text-center text-white">source code: <a href="https://github.com/ericmartinpe/ericmartinpe.github.io">ericmartinpe.github.io</p></div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
+</html>
